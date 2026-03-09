@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, Platform, Image, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
+import { API_BASE_URL } from '../../src/services/api/client';
 
 const { width, height } = Dimensions.get('window');
 const uiScale = Math.max(0.78, Math.min(Math.min(width / 390, height / 844), 1.15));
@@ -24,6 +25,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     console.log('[Auth][Login] Button pressed');
+    if (loading) return;
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail || !password) {
@@ -50,7 +52,7 @@ export default function LoginScreen() {
 
       let message = 'Login failed';
       if (typedError.code === 'ECONNABORTED') {
-        message = 'Server timeout. Render may be waking up, retry in 30-60s.';
+        message = `Server timeout. API may be down or cold-starting. Endpoint: ${API_BASE_URL}`;
       } else if (typedError.code === 'ERR_NETWORK') {
         message = 'Network error. Check internet/CORS/backend status.';
       } else if (typedError.response?.data?.error?.details?.length) {
@@ -64,6 +66,7 @@ export default function LoginScreen() {
       console.error('[Auth][Login] Error:', error);
       console.error('[Auth][Login] Status:', typedError.response?.status);
       console.error('[Auth][Login] Response:', typedError.response?.data);
+      console.error('[Auth][Login] API Base URL:', API_BASE_URL);
       showMessage(message);
     } finally {
       setLoading(false);
