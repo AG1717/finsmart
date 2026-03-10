@@ -55,12 +55,15 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/(auth)/welcome')}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
+        <View style={styles.spacer} />
         <Text style={styles.headerTitle}>Dashboard</Text>
-        <TouchableOpacity onPress={() => router.push('/(tabs)/profile')}>
-          <Ionicons name="person-circle-outline" size={rs(30)} color="#18133E" />
+        <TouchableOpacity style={styles.profileSection} onPress={() => router.push('/(tabs)/profile')}>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileUsername} numberOfLines={1}>
+              {user?.username || user?.email?.split('@')[0]}
+            </Text>
+            <Ionicons name="person-circle-outline" size={rs(30)} color="#18133E" />
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -179,10 +182,29 @@ const styles = StyleSheet.create({
     fontSize: rs(24),
     color: '#111111',
   },
+  spacer: {
+    width: rs(30),
+  },
   headerTitle: {
     fontSize: rs(30),
     fontWeight: '700',
     color: '#101033',
+  },
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileInfo: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: rs(4),
+  },
+  profileUsername: {
+    fontSize: rs(12),
+    color: '#18133E',
+    fontWeight: '600',
+    maxWidth: rs(90),
+    textAlign: 'center',
   },
   kpiCard: {
     height: rs(194),

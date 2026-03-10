@@ -37,6 +37,31 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleResetGoals = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to reset all goals? This will reset all counters to zero.')) {
+        // TODO: Call API to reset goals
+        Alert.alert('Success', 'All goals have been reset');
+      }
+    } else {
+      Alert.alert(
+        'Reset Goals',
+        'Are you sure you want to reset all goals? This will reset all counters to zero.',
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: 'Reset',
+            style: 'destructive',
+            onPress: async () => {
+              // TODO: Call API to reset goals
+              Alert.alert('Success', 'All goals have been reset');
+            },
+          },
+        ]
+      );
+    }
+  };
+
   const changeLanguage = async (lang: string) => {
     await i18n.changeLanguage(lang);
     await saveLanguage(lang);

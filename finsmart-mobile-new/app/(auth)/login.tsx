@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, Platform, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, Platform, Image, Dimensions, ScrollView, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { API_BASE_URL } from '../../src/services/api/client';
 
@@ -14,6 +15,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const showMessage = (message: string) => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -74,72 +76,103 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Pressable onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backText}>←</Text>
-      </Pressable>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.logoWrap}>
+          <View style={styles.logoContainer}>
+            <Image source={require('../../assets/logo_new.png')} style={styles.logoImage} resizeMode="contain" />
+          </View>
+          <Text style={styles.appName}>FinSmart</Text>
+        </View>
 
-      <View style={styles.logoWrap}>
-        <Image source={require('../../assets/logo_new.png')} style={styles.logoImage} resizeMode="contain" />
-        <Text style={styles.appName}>FinSmart</Text>
-      </View>
+        <Text style={styles.title}>Account</Text>
 
-      <Text style={styles.title}>Account</Text>
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#A9A9B3"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+          />
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#A9A9B3"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Password"
+              placeholderTextColor="#A9A9B3"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity 
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons 
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'} 
+                size={24} 
+                color="#2F8AC1" 
+              />
+            </TouchableOpacity>
+          </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#A9A9B3"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <Pressable style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]} onPress={handleLogin} disabled={loading}>
+            <Text style={styles.loginButtonText}>{loading ? 'Loading...' : 'Login'}</Text>
+          </Pressable>
 
-        <Pressable style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]} onPress={handleLogin} disabled={loading}>
-          <Text style={styles.loginButtonText}>{loading ? 'Loading...' : 'Login'}</Text>
-        </Pressable>
-      </View>
-    </View>
+          <View style={styles.signupPrompt}>
+            <Text style={styles.signupText}>Vous n'avez pas encore de compte? </Text>
+            <Pressable onPress={() => router.push('/(auth)/register')}>
+              <Text style={styles.signupLink}>S'inscrire</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#FFFFFF',
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: rs(20),
     paddingTop: rs(42),
-  },
-  backButton: {
-    width: rs(34),
-    height: rs(34),
+    paddingBottom: rs(24),
     justifyContent: 'center',
-  },
-  backText: {
-    fontSize: rs(24),
-    color: '#12122E',
   },
   logoWrap: {
     alignItems: 'center',
-    marginTop: rs(6),
-    marginBottom: rs(24),
+    marginTop: rs(-40),
+    marginBottom: rs(32),
+  },
+  logoContainer: {
+    width: rs(333),
+    height: rs(256),
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: rs(-16),
+    borderRadius: rs(12),
   },
   logoImage: {
-    width: rs(112),
-    height: rs(86),
+    width: '100%',
+    height: '100%',
   },
   appName: {
-    marginTop: rs(4),
+    marginTop: rs(-8),
     fontSize: rs(34),
     fontWeight: '700',
     color: '#2F8AC1',
@@ -149,13 +182,13 @@ const styles = StyleSheet.create({
     fontSize: rs(30),
     fontWeight: '700',
     color: '#2F8AC1',
-    marginBottom: rs(18),
+    marginBottom: rs(32),
   },
   form: {
     width: '100%',
     maxWidth: 520,
     alignSelf: 'center',
-    gap: rs(12),
+    gap: rs(20),
   },
   input: {
     height: rs(52),
@@ -165,10 +198,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: rs(14),
     fontSize: rs(18),
     color: '#12122E',
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#FFFFFF',
+  },
+  passwordContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  passwordInput: {
+    height: rs(52),
+    borderWidth: 2,
+    borderColor: '#2F8AC1',
+    borderRadius: 8,
+    paddingHorizontal: rs(14),
+    paddingRight: rs(50),
+    fontSize: rs(18),
+    color: '#12122E',
+    backgroundColor: '#FFFFFF',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: rs(12),
+    height: rs(52),
+    justifyContent: 'center',
+    paddingHorizontal: rs(8),
   },
   loginButton: {
-    marginTop: rs(8),
+    marginTop: rs(12),
     alignSelf: 'center',
     width: Math.min(width - rs(52), rs(290)),
     height: rs(54),
@@ -184,5 +239,23 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.86,
+  },
+  signupPrompt: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: rs(12),
+    gap: rs(4),
+  },
+  signupText: {
+    fontSize: rs(16),
+    color: '#666',
+    fontWeight: '400',
+  },
+  signupLink: {
+    fontSize: rs(16),
+    color: '#2F8AC1',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
